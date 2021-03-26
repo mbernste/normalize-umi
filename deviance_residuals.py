@@ -1,8 +1,3 @@
-"""
-Normalization via binomial deviance residuals as described in Townes et al.
-https://genomebiology.biomedcentral.com/articles/10.1186/s13059-019-1861-6
-"""
-
 import numpy as np
 
 def normalize(X):
@@ -13,10 +8,6 @@ def normalize(X):
         MxG matrix of raw counts where M is the number of samples
         and G is the number of genes
 
-    Returns
-    -------
-    A MxG matrix of normalized expression values
-
     """
     # Total counts. This is an MxG matrix where each row repeats
     # the total counts for the given row's sample.
@@ -25,8 +16,11 @@ def normalize(X):
         np.sum(X, axis=1)
     ).T
 
-    # Means. This is a G-length vector of gene means.
-    M = np.mean(X, axis=0)
+    # Compute \pi_j = \frac{\sum_i y_ij}{\sum_i n_i}
+    pi = np.sum(X, axis=0) / np.sum(N)
+
+    # Compute the matrix M where element M_{i,j} = n_i\pi_j
+    M = np.outer(np.sum(X, axis=1), pi)
 
     # Compute residual deviances
     R = np.sign(X - M) * np.sqrt(
